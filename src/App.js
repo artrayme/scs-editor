@@ -7,7 +7,8 @@ import FileTree from './Utilities/FileTree';
 import {Folder, Menu, Save, X, Plus, FileText} from 'react-feather';
 import {config, language, scsTheme, getCompletionProvider} from './Utilities/scs-support';
 import hotkeys from 'hotkeys-js';
-import {convertGwfToScs} from './Utilities/converter'
+import {convertGwfToScs} from './Utilities/ScsConverter'
+import {convertOldGwfToNew} from './Utilities/ScgConverter'
 
 const remote = window.require('electron').remote;
 const fs = remote.require('fs');
@@ -56,6 +57,7 @@ class App extends React.Component {
         // ToDo make check more reliable
         if (filepath.endsWith('.gwf')) {
             //  ToDo converter
+            data = convertOldGwfToNew(data)
              data = convertGwfToScs(data)
             // filepath.re
                // change filepath
