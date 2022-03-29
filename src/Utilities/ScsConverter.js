@@ -1,28 +1,28 @@
-// var root = document.documentElement; //взятие первого узла из документа (для примера текущий документ)
+// var root = xmlDoc; //взятие первого узла из документа (для примера текущий документ)
 // getChildren(root);      //проходим по всему DOM дереву
 let pairDictionary;
 let tempElement;
 let flag;
 let resultStat = null;
+let xmlDoc;
 
 export function convertGwfToScs(content){
+    resultStat = ""
     pairDictionary = getPairDictionary()
     let parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(content, "text/xml");
-    getChildren(xmlDoc.childNodes[0])
+    xmlDoc = parser.parseFromString(content, "text/xml");
+    let childNode = xmlDoc.childNodes[0];
+    getChildren(childNode)
     return resultStat
 }
 
 function getChildren(elem) {
     for (const i in elem.childNodes) {
-
         if (elem.childNodes[i].nodeType === 1) {
 
             if (elem.childNodes[i].hasAttribute("type")) {
-
                 //если дуга, то проверяем идет она в дугу или в узел
-                if (elem.childNodes[i].tagName === "ARC" || elem.childNodes[i].tagName === "PAIR") {
-
+                if (elem.childNodes[i].tagName === "arc" || elem.childNodes[i].tagName === "pair") {
                     checkChildren(elem.childNodes[i], "", true);
                     getRes();
                 }
@@ -40,17 +40,17 @@ function getRes () {
 
 function checkChildren(elem, end, flagIsEnd) {
 
-    isGotoNode(document.documentElement, elem.getAttribute("id_b")); //проверяем первый элемент узел или дуга
+    isGotoNode(xmlDoc, elem.getAttribute("id_b")); //проверяем первый элемент узел или дуга
 
     if (flag) { //узел
-        findNodeById(document.documentElement, elem.getAttribute("id_b"));
+        findNodeById(xmlDoc, elem.getAttribute("id_b"));
         if (resultStat == null) {
             resultStat = tempElement.getAttribute("idtf");
         } else {
             resultStat += tempElement.getAttribute("idtf");
         }
     } else { //дуга
-        findNodeById(document.documentElement, elem.getAttribute("id_b"));
+        findNodeById(xmlDoc, elem.getAttribute("id_b"));
 
         if (resultStat == null) {
             resultStat = '(';
@@ -62,9 +62,9 @@ function checkChildren(elem, end, flagIsEnd) {
         checkChildren(tempElement, end, false);
     }
 
-    findNodeById(document.documentElement, elem.getAttribute("id_e"));
+    findNodeById(xmlDoc, elem.getAttribute("id_e"));
 
-    isGotoNode(document.documentElement, elem.getAttribute("id_e")); //проверяем второй элемент узел или дуга
+    isGotoNode(xmlDoc, elem.getAttribute("id_e")); //проверяем второй элемент узел или дуга
     if (flag) {
         resultStat+=pairDictionary.get(elem.getAttribute("type")) + tempElement.getAttribute("idtf") + end;
         if (flagIsEnd) {
@@ -90,8 +90,7 @@ function isGotoNode(elem, id) {
 
             if (elem.childNodes[i].getAttribute("id") === id) {
                 //проверяем чтобы это была дуга
-                pairDictionary = getPairDictionary();
-                flag = elem.childNodes[i].tagName !== "PAIR";
+                flag = elem.childNodes[i].tagName !== "pair";
             }
 
             isGotoNode(elem.childNodes[i], id);
@@ -100,8 +99,6 @@ function isGotoNode(elem, id) {
     }
 
 }
-
-
 
 function findNodeById(elem, id) {
 
@@ -119,7 +116,6 @@ function findNodeById(elem, id) {
     }
 
 }
-
 
 function getPairDictionary() {
     const replacementPairs = new Map();
@@ -142,3 +138,4 @@ function getPairDictionary() {
         .set("pair/const/neg/perm/orient/membership", "..>"); //тут все дуги, кроме двух _<=> и _=>
     return replacementPairs;
 }
+
