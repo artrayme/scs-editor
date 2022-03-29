@@ -45,9 +45,17 @@ function checkChildren(elem, end, flagIsEnd) {
     if (flag) { //узел
         findNodeById(xmlDoc, elem.getAttribute("id_b"));
         if (resultStat == null) {
+          if (tempElement.getAttribute("idtf") != "") {
             resultStat = tempElement.getAttribute("idtf");
+          } else {
+            resultStat = "_"
+          }
         } else {
+          if (tempElement.getAttribute("idtf") != "") {
             resultStat += tempElement.getAttribute("idtf");
+          } else {
+            resultStat += "_"
+          }
         }
     } else { //дуга
         findNodeById(xmlDoc, elem.getAttribute("id_b"));
@@ -66,13 +74,20 @@ function checkChildren(elem, end, flagIsEnd) {
 
     isGotoNode(xmlDoc, elem.getAttribute("id_e")); //проверяем второй элемент узел или дуга
     if (flag) {
-        resultStat+=pairDictionary.get(elem.getAttribute("type")) + tempElement.getAttribute("idtf") + end;
-        if (flagIsEnd) {
-            resultStat+= ";;\n";
-        }
+      resultStat+= " " + pairDictionary.get(elem.getAttribute("type")) + " ";
+        
+      if (tempElement.getAttribute("idtf") != "") {
+        resultStat += tempElement.getAttribute("idtf") + end;
+      } else {
+        resultStat += "_" + end;
+      }
+
+      if (flagIsEnd) {
+        resultStat+= ";;\n";
+      }
     } else {
         //в дугу
-        resultStat+=pairDictionary.get(elem.getAttribute("type"));
+        resultStat+= " " + pairDictionary.get(elem.getAttribute("type")) + " ";
         resultStat+= '(';
 
         end += ")";
@@ -120,22 +135,40 @@ function findNodeById(elem, id) {
 function getPairDictionary() {
     const replacementPairs = new Map();
     replacementPairs.set("pair/const/-/perm/noorien", "<=>")
-        .set("pair/const/-/perm/orient", "=>")
-        .set("pair/const/fuz/perm/orient/membership", "-/>")
-        .set("pair/const/fuz/temp/orient/membership", "~/>")
-        .set("pair/var/pos/perm/orient/membership", "_->")
-        .set("pair/var/neg/temp/orient/membership", "_~|>")
-        .set("pair/var/neg/perm/orient/membership", "_-|>")
-        .set("pair/const/pos/perm/orient/membership", "->")
-        .set("pair/const/pos/temp/orient/membership", "~>")
-        .set("pair/var/fuz/temp/orient/membership", "_~/>")
-        .set("pair/var/fuz/perm/orient/membership", "_-/>")
-        .set("pair/var/neg/perm/orient/membership", "-|>")
-        .set("pair/var/neg/temp/orient/membership", "~|>")
-        .set("pair/var/pos/temp/orient/membership", "_~>")
-        .set("pair/-/-/-/noorient", "<>")
-        .set("pair/-/-/-/orient", ">")
-        .set("pair/const/neg/perm/orient/membership", "..>"); //тут все дуги, кроме двух _<=> и _=>
+    .set("pair/const/-/perm/orient", "=>")
+    .set("pair/const/fuz/perm/orient/membership", "-/>")
+    .set("pair/const/fuz/temp/orient/membership", "~/>")
+    .set("pair/var/pos/perm/orient/membership", "_->")
+    .set("pair/var/neg/temp/orient/membership", "_~|>") 
+    .set("pair/var/neg/perm/orient/membership", "_-|>") 
+    .set("pair/const/pos/perm/orient/membership", "->")
+    .set("pair/const/pos/temp/orient/membership", "~>")
+    .set("pair/var/fuz/temp/orient/membership", "_~/>")
+    .set("pair/var/fuz/perm/orient/membership", "_-/>")
+    .set("pair/const/neg/perm/orient/membership", "-|>") //а еще 7я это ..>
+    .set("pair/const/neg/temp/orient/membership", "~|>") 
+    .set("pair/var/pos/temp/orient/membership", "_~>")
+    .set("pair/-/-/-/noorient", "<>")
+    .set("pair/-/-/-/orient", ">")//тут все дуги, кроме двух _<=> и _=> тк их не существует
+
+  //тут установим дуги, которые по сути не переводятся, но они зачем-то существуют
+    .set("pair/meta/pos/temp/orient/membership", "->")
+    .set("pair/meta/pos/perm/orient/membership", "->")
+    .set("pair/meta/neg/temp/orient/membership", "->")
+    .set("pair/meta/neg/perm/orient/membership", "->")
+    .set("pair/meta/fuz/temp/orient/membership", "->")
+    .set("pair/meta/fuz/perm/orient/membership", "->")
+    .set("pair/meta/-/temp/orient", "->")
+    .set("pair/meta/-/temp/noorien", "->")
+    .set("pair/meta/-/perm/orient", "->")
+    .set("pair/meta/-/perm/noorien", "->")
+    .set("pair/var/-/temp/orient", "->")
+    .set("pair/var/-/temp/noorien", "->")
+    .set("pair/var/-/perm/orient", "->")
+    .set("pair/var/-/perm/noorien", "->")
+    .set("pair/const/-/temp/orient", "->")
+    .set("pair/const/-/temp/noorien", "->");
+
     return replacementPairs;
 }
 
