@@ -43,20 +43,37 @@ function checkChildren(elem, end, flagIsEnd) {
     isGotoNode(xmlDoc, elem.getAttribute("id_b")); //проверяем первый элемент узел или дуга
 
     if (flag) { //узел
-        findNodeById(xmlDoc, elem.getAttribute("id_b"));
-        if (resultStat == null) {
-          if (tempElement.getAttribute("idtf") != "") {
-            resultStat = tempElement.getAttribute("idtf");
-          } else {
-            resultStat = "_"
-          }
-        } else {
-          if (tempElement.getAttribute("idtf") != "") {
-            resultStat += tempElement.getAttribute("idtf");
-          } else {
-            resultStat += "_"
-          }
-        }
+       findNodeById(xmlDoc, elem.getAttribute("id_b"));
+                if (resultStat == null) {
+                    if (tempElement.tagName === "content") {
+                        if (tempElement.getAttribute("file_name") != "") {
+                            resultStat = "\"file://" + tempElement.getAttribute("file_name") +"\"";
+                        } else {
+                            resultStat = "_"
+                        }
+                    } else {
+                        if (tempElement.getAttribute("idtf") != "") {
+                            resultStat = tempElement.getAttribute("idtf");
+                        } else {
+                            resultStat = "_"
+                        }
+                    }
+
+                } else {
+                    if (tempElement.tagName === "content") {
+                        if (tempElement.getAttribute("file_name") != "") {
+                            resultStat += "\"file://" + tempElement.getAttribute("file_name") +"\"";
+                        } else {
+                            resultStat += "_"
+                        }
+                    } else {
+                        if (tempElement.getAttribute("idtf") != "") {
+                            resultStat += tempElement.getAttribute("idtf");
+                        } else {
+                            resultStat += "_"
+                        }
+                    }
+                }
     } else { //дуга
         findNodeById(xmlDoc, elem.getAttribute("id_b"));
 
@@ -76,11 +93,19 @@ function checkChildren(elem, end, flagIsEnd) {
     if (flag) {
       resultStat+= " " + pairDictionary.get(elem.getAttribute("type")) + " ";
         
-      if (tempElement.getAttribute("idtf") != "") {
-        resultStat += tempElement.getAttribute("idtf") + end;
-      } else {
-        resultStat += "_" + end;
-      }
+      if (tempElement.tagName === "content") {
+                    if (tempElement.getAttribute("file_name") != "") {
+                        resultStat += "\"file://" + tempElement.getAttribute("file_name") +"\""+ end;
+                    } else {
+                        resultStat += "_" + end;
+                    }
+                } else {
+                    if (tempElement.getAttribute("idtf") != "") {
+                        resultStat += tempElement.getAttribute("idtf") + end;
+                    } else {
+                        resultStat += "_" + end;
+                    }
+                }
 
       if (flagIsEnd) {
         resultStat+= ";;\n";
@@ -122,7 +147,29 @@ function findNodeById(elem, id) {
         if (elem.childNodes[i].nodeType === 1) {
 
             if (elem.childNodes[i].getAttribute("id") === id) {
-                tempElement = elem.childNodes[i];
+                    //нашли по id, теперь будем чекать это узел, шина, контур или картинка
+                        if (elem.childNodes[i].tagName === "node") { //здесь либо картинка, либо узел
+                            try {
+                                if (elem.childNodes[i].childNodes[1].tagName === "content" && 
+                                elem.childNodes[i].childNodes[1].getAttribute("file_name") != "") { //картинка
+                                    tempElement = elem.childNodes[i].childNodes[1];
+                                } else {
+                                    tempElement = elem.childNodes[i];
+                                }
+                            } catch (e) { //если ошибка вылезла, то это какой-то странный неправильный узел
+                                tempElement = elem.childNodes[i];
+                                return;
+                            }
+
+                        } else if (elem.childNodes[i].tagName === "bus") {
+                            //ищем по атрибуту "owner", который является id узла (node)
+                            findNodeById(xmlDoc, elem.childNodes[i].getAttribute("owner"));
+                        } else if (elem.childNodes[i].tagName === "contour") {
+                            //ПОКА ХЗ ЧТО ДЕЛАТЬ С КОНТУРАМИ
+                        } else if (elem.childNodes[i].tagName === "pair") {
+                            tempElement = elem.childNodes[i];
+                            return;
+                        }
             }
 
             findNodeById(elem.childNodes[i], id);
