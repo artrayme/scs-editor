@@ -8,16 +8,15 @@ export function convertGwfToScs(content){
   xmlDoc = parser.parseFromString(content, "text/xml");
   let childNode = xmlDoc.childNodes[0];
 
-  resultStat = ""
   pairDictionary = getPairDictionary();
   temporaryNames = new Map();
-  getTempChildren(childNode);
+  getTempChildren(xmlDoc);
 
   let translatedDoc = {
     statement: ""
   };
   getChildren(childNode, translatedDoc);
-  return resultStat
+  return translatedDoc.statement;
 }
 
 function getTempChildren(elem) {
@@ -27,7 +26,7 @@ function getTempChildren(elem) {
 
       if (elem.childNodes[i].hasAttribute("type")) {
           if (elem.childNodes[i].tagName == "node" && elem.childNodes[i].getAttribute("idtf") == "") {
-              temporaryNames.set(elem.childNodes[i].getAttribute("id"), "temp_sc_node"+nodeCounter);
+              temporaryNames.set(elem.childNodes[i].getAttribute("id"), "temp_sc_node" + nodeCounter);
               nodeCounter += 1;
             }
       }
@@ -61,7 +60,7 @@ function getChildren(elem, translatedDoc) {
             }
         
             let st = getTranslated(statement, false);
-            console.log(st);
+            translatedDoc.statement += st;
           }
 
         getChildren(elem.childNodes[i], translatedDoc);
